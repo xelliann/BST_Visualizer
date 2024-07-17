@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search Tree Visualization</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container">
+        <h1>Binary Search Tree Visualization</h1>
+        <div id="controls">
+            <label for="action">Select Action:</label>
+            <select id="action">
+                <option value="insert">Insert Node</option>
+                <option value="delete">Delete Node</option>
+                <option value="search">Search Node</option>
+            </select>
+            <input type="number" id="nodeValue" placeholder="Enter Node Value" aria-label="Node Value">
+            <button id="submitBtn">Submit</button>
+        </div>
+        <svg id="treeCanvas" aria-label="Binary Search Tree" width="1000" height="600"></svg>
+        <div id="console" aria-label="Console Output"></div>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="bst.js"></script>
+</body>
+</html>
