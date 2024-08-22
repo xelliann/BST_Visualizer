@@ -2,7 +2,7 @@
 
 This project implements a Binary Search Tree (BST) in C++ with a web-based visualization and interaction interface using HTML, CSS, and JavaScript. Explore how BST operations such as insertion, deletion, searching, and traversal are seamlessly integrated with dynamic SVG-based visualization for an intuitive user experience.
 
-![BST Visualization](./img.png)
+![BST Visualization](./1.png)
 
 ## Features
 
