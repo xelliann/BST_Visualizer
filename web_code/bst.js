@@ -119,7 +119,7 @@ class BST {
                     .attr("fill", "white")
                     .text(node.value);
 
-                const horizontalSpacing = 70 - depth * 10;
+                const horizontalSpacing = 100 - depth * 10;
                 const verticalSpacing = 50;
 
                 if (node.left !== null) {
