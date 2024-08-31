@@ -25,35 +25,37 @@ public:
     }
 
     void insertNode(TreeNode* new_node) {
-        if (root == nullptr) {
-            root = new_node;
-            cout << "Value inserted as root node" << endl;
-        } else {
-            TreeNode* temp = root;
-            while (true) {
-                if (new_node->value == temp->value) {
-                    cout << "Value already exists" << endl;
-                    return;
-                } else if (new_node->value < temp->value) {
-                    if (temp->left == nullptr) {
-                        temp->left = new_node;
-                        cout << "Node inserted" << endl;
-                        break;
-                    } else {
-                        temp = temp->left;
-                    }
+    if (root == nullptr) {
+        root = new_node;
+        cout << "Value inserted as root node" << endl;
+    } else {
+        TreeNode* temp = root;
+        while (true) {
+            if (new_node->value == temp->value) {
+                cout << "Value already exists" << endl;
+                delete new_node; // Avoid memory leak
+                return;
+            } else if (new_node->value < temp->value) {
+                if (temp->left == nullptr) {
+                    temp->left = new_node;
+                    cout << "Node inserted" << endl;
+                    break;
                 } else {
-                    if (temp->right == nullptr) {
-                        temp->right = new_node;
-                        cout << "Node inserted" << endl;
-                        break;
-                    } else {
-                        temp = temp->right;
-                    }
+                    temp = temp->left;
+                }
+            } else {
+                if (temp->right == nullptr) {
+                    temp->right = new_node;
+                    cout << "Node inserted" << endl;
+                    break;
+                } else {
+                    temp = temp->right;
                 }
             }
         }
     }
+}
+
 
     void printPreorder(TreeNode* r) const {
         if (r == nullptr)

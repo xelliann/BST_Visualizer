@@ -8,21 +8,27 @@
 </head>
 <body>
     <div id="container">
-        <h1>Binary Search Tree Visualization</h1>
         <div id="controls">
-            <label for="action">Select Action:</label>
+            <label for="action">Action:</label>
             <select id="action">
-                <option value="insert">Insert Node</option>
-                <option value="delete">Delete Node</option>
-                <option value="search">Search Node</option>
+                <option value="insert">Insert</option>
+                <option value="delete">Delete</option>
+                <option value="search">Search</option>
             </select>
-            <input type="number" id="nodeValue" placeholder="Enter Node Value" aria-label="Node Value">
+
+            <label for="nodeValue">Enter a value:</label>
+            <input type="text" id="nodeValue" placeholder="Enter a value">
+
             <button id="submitBtn">Submit</button>
         </div>
-        <svg id="treeCanvas" aria-label="Binary Search Tree" width="1000" height="600"></svg>
-        <div id="console" aria-label="Console Output"></div>
+
+        <div id="treeWrapper">
+            <svg id="treeCanvas"></svg>
+        </div>
+
+        <div id="console" style="border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto;"></div>
     </div>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="bst.js"></script>
+    <script src="bst copy.js"></script>
 </body>
 </html>

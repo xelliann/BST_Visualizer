@@ -1,49 +1,82 @@
+console.log('Script loaded');
+
+class Node {
+    constructor(value, depth = 0) {
+        this.value = value;
+        this.left = null;
+        this.right = null;
+        this.position = { x: 0, y: 0 };
+        this.depth = depth;
+    }
+}
+
 class BST {
     constructor() {
         this.root = null;
+        this.nodeRadius = 20;
+        this.initialHorizontalSpacing = 60; // Base spacing
+        this.spacingIncrement = 20; // Amount to increase spacing after each insertion
+        this.currentHorizontalSpacing = this.initialHorizontalSpacing; // Current spacing value
+        this.verticalSpacing = 80;   // Vertical spacing
     }
 
     insert(value) {
-        const newNode = {
-            value: value,
-            left: null,
-            right: null
-        };
-
+        const newNode = new Node(value);
+    
         if (this.root === null) {
             this.root = newNode;
-            this.log(`Value ${value} inserted as root node`);
+            this.root.position = {
+                x: document.getElementById("treeCanvas").getBoundingClientRect().width / 2,
+                y: 40
+            };
+            this.renderTree(); // Render immediately after setting the initial position
         } else {
-            this._insertNode(this.root, newNode);
+            this.insertNode(this.root, newNode);
+            this.updatePositions(this.root, document.getElementById("treeCanvas").getBoundingClientRect().width / 2, 40, this.currentHorizontalSpacing);
+            this.renderTree();
         }
-        this.renderTree();
+    
+        // Increase spacing for the next insertion
+        this.currentHorizontalSpacing += this.spacingIncrement;
     }
 
-    _insertNode(root, newNode) {
-        if (newNode.value < root.value) {
-            if (root.left === null) {
-                root.left = newNode;
-                this.log(`Value ${newNode.value} inserted`);
+    insertNode(currentNode, newNode, depth = 1) {
+        newNode.depth = depth;
+        if (newNode.value < currentNode.value) {
+            if (currentNode.left === null) {
+                currentNode.left = newNode;
             } else {
-                this._insertNode(root.left, newNode);
-            }
-        } else if (newNode.value > root.value) {
-            if (root.right === null) {
-                root.right = newNode;
-                this.log(`Value ${newNode.value} inserted`);
-            } else {
-                this._insertNode(root.right, newNode);
+                this.insertNode(currentNode.left, newNode, depth + 1);
             }
         } else {
-            this.log(`Value ${newNode.value} already exists`);
+            if (currentNode.right === null) {
+                currentNode.right = newNode;
+            } else {
+                this.insertNode(currentNode.right, newNode, depth + 1);
+            }
+        }
+    }
+
+    updatePositions(node, x, y, spacing) {
+        if (node !== null) {
+            node.position = { x: x, y: y };
+            const nextY = y + this.verticalSpacing;
+    
+            if (node.left !== null) {
+                this.updatePositions(node.left, x - spacing, nextY, spacing / 2);
+            }
+            if (node.right !== null) {
+                this.updatePositions(node.right, x + spacing, nextY, spacing / 2);
+            }
         }
     }
 
     delete(value) {
         this.root = this._deleteNode(this.root, value);
+        this.updatePositions(this.root, document.getElementById("treeCanvas").getBoundingClientRect().width / 2, 40, this.currentHorizontalSpacing);
         this.renderTree();
     }
-
+    
     _deleteNode(root, value) {
         if (root === null) {
             this.log(`Value ${value} not found`);
@@ -100,87 +133,125 @@ class BST {
     }
 
     renderTree() {
+        console.log('Rendering tree...');
         const svg = d3.select("#treeCanvas");
-        svg.selectAll("*").remove();
+        svg.selectAll("*").remove(); // Clear existing content
+    
+        // Render nodes and curved lines
+        this.renderNode(svg, this.root);
+    
+        // Adjust SVG dimensions
+        this.adjustSVGSize(svg);
+    }
 
-        const renderNode = (node, x, y, depth) => {
-            if (node !== null) {
-                svg.append("circle")
-                    .attr("cx", x)
-                    .attr("cy", y)
-                    .attr("r", 20)
-                    .attr("fill", "#4CAF50");
+    adjustSVGSize(svg) {
+        const nodes = this.getNodes();
+        if (nodes.length === 0) return;
 
-                svg.append("text")
-                    .attr("x", x)
-                    .attr("y", y)
-                    .attr("dy", ".35em")
-                    .attr("text-anchor", "middle")
-                    .attr("fill", "white")
-                    .text(node.value);
+        const maxX = d3.max(nodes, node => node.position.x + this.nodeRadius);
+        const minX = d3.min(nodes, node => node.position.x - this.nodeRadius);
+        const maxY = d3.max(nodes, node => node.position.y + this.nodeRadius);
+        const minY = d3.min(nodes, node => node.position.y - this.nodeRadius);
 
-                const horizontalSpacing = 100 - depth * 10;
-                const verticalSpacing = 50;
+        const margin = 20;
+        const width = Math.max(maxX - minX + this.nodeRadius * 2, window.innerWidth / 2);
+        const height = Math.max(maxY - minY + this.nodeRadius * 2, window.innerHeight / 2);
 
-                if (node.left !== null) {
-                    svg.append("line")
-                        .attr("x1", x)
-                        .attr("y1", y)
-                        .attr("x2", x - horizontalSpacing)
-                        .attr("y2", y + verticalSpacing)
-                        .attr("stroke", "#ccc")
-                        .attr("stroke-width", 2);
-                    renderNode(node.left, x - horizontalSpacing, y + verticalSpacing, depth + 1);
-                }
+        svg.attr("width", width)
+           .attr("height", height)
+           .attr("viewBox", `${minX - margin} ${minY - margin} ${width + margin * 2} ${height + margin * 2}`);
+    }
 
-                if (node.right !== null) {
-                    svg.append("line")
-                        .attr("x1", x)
-                        .attr("y1", y)
-                        .attr("x2", x + horizontalSpacing)
-                        .attr("y2", y + verticalSpacing)
-                        .attr("stroke", "#ccc")
-                        .attr("stroke-width", 2);
-                    renderNode(node.right, x + horizontalSpacing, y + verticalSpacing, depth + 1);
-                }
+    getNodes() {
+        let nodes = [];
+        function traverse(node) {
+            if (node) {
+                nodes.push(node);
+                traverse(node.left);
+                traverse(node.right);
             }
-        };
+        }
+        traverse(this.root);
+        return nodes;
+    }
 
-        renderNode(this.root, svg.attr("width") / 2, 40, 1);
+    renderNode(svg, node) {
+        if (node !== null) {
+            // Draw the node as a circle
+            svg.append("circle")
+                .attr("cx", node.position.x)
+                .attr("cy", node.position.y)
+                .attr("r", this.nodeRadius)
+                .attr("fill", "#4CAF50");
+
+            // Draw the value inside the node
+            svg.append("text")
+                .attr("x", node.position.x)
+                .attr("y", node.position.y)
+                .attr("dy", ".35em")
+                .attr("text-anchor", "middle")
+                .attr("fill", "white")
+                .text(node.value);
+
+            // Draw curved lines to children
+            if (node.left !== null) {
+                this.drawCurvedLine(svg, node, node.left);
+                this.renderNode(svg, node.left);
+            }
+
+            if (node.right !== null) {
+                this.drawCurvedLine(svg, node, node.right);
+                this.renderNode(svg, node.right);
+            }
+        }
+    }
+
+    drawCurvedLine(svg, parent, child) {
+        const midX = (parent.position.x + child.position.x) / 2;
+        const midY = parent.position.y + 30;
+
+        const pathData = `
+            M ${parent.position.x} ${parent.position.y}
+            Q ${midX} ${midY} ${child.position.x} ${child.position.y}
+        `;
+
+        svg.append("path")
+            .attr("d", pathData)
+            .attr("stroke", "#ccc")
+            .attr("stroke-width", 2)
+            .attr("fill", "none");
     }
 
     log(message) {
         const consoleDiv = document.getElementById('console');
-        const messageDiv = document.createElement('div');
-        messageDiv.textContent = message;
-        consoleDiv.appendChild(messageDiv);
-        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        if (consoleDiv) {
+            const messageDiv = document.createElement('div');
+            messageDiv.textContent = message;
+            consoleDiv.appendChild(messageDiv);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight; // Scroll to the bottom
+        } else {
+            console.error('Console div not found');
+        }
     }
 }
 
 const bst = new BST();
 
-document.addEventListener('DOMContentLoaded', function() {
-    const actionSelect = document.getElementById('action');
-    const nodeValueInput = document.getElementById('nodeValue');
-    const submitBtn = document.getElementById('submitBtn');
+document.getElementById('submitBtn').addEventListener('click', function () {
+    console.log('Submit button clicked'); // Debugging statement
+    const action = document.getElementById('action').value;
+    const value = parseInt(document.getElementById('nodeValue').value);
 
-    submitBtn.addEventListener('click', function() {
-        const value = parseInt(nodeValueInput.value);
-        if (!isNaN(value)) {
-            const action = actionSelect.value;
-            if (action === 'insert') {
-                bst.insert(value);
-            } else if (action === 'delete') {
-                bst.delete(value);
-            } else if (action === 'search') {
-                bst.search(value);
-            } else {
-                console.log('Action not recognized');
-            }
-            nodeValueInput.value = '';
-        } else {
-            alert('Please enter a valid number.');
-        }
-    });
+    if (isNaN(value)) {
+        bst.log('Please enter a valid number');
+        return;
+    }
+
+    if (action === 'insert') {
+        bst.insert(value);
+    } else if (action === 'delete') {
+        bst.delete(value);
+    } else if (action === 'search') {
+        bst.search(value);
+    }
 });
