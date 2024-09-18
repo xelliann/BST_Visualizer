@@ -14,15 +14,15 @@ class BST {
     constructor() {
         this.root = null;
         this.nodeRadius = 20;
-        this.initialHorizontalSpacing = 60; // Base spacing
-        this.spacingIncrement = 20; // Amount to increase spacing after each insertion
+        this.initialHorizontalSpacing = 100; // Increased base spacing
+        this.spacingIncrement = 30; // Increased spacing increment
         this.currentHorizontalSpacing = this.initialHorizontalSpacing; // Current spacing value
-        this.verticalSpacing = 80;   // Vertical spacing
+        this.verticalSpacing = 100;   // Increased vertical spacing
     }
 
     insert(value) {
         const newNode = new Node(value);
-    
+
         if (this.root === null) {
             this.root = newNode;
             this.root.position = {
@@ -35,7 +35,7 @@ class BST {
             this.updatePositions(this.root, document.getElementById("treeCanvas").getBoundingClientRect().width / 2, 40, this.currentHorizontalSpacing);
             this.renderTree();
         }
-    
+
         // Increase spacing for the next insertion
         this.currentHorizontalSpacing += this.spacingIncrement;
     }
@@ -61,7 +61,7 @@ class BST {
         if (node !== null) {
             node.position = { x: x, y: y };
             const nextY = y + this.verticalSpacing;
-    
+
             if (node.left !== null) {
                 this.updatePositions(node.left, x - spacing, nextY, spacing / 2);
             }
@@ -76,7 +76,7 @@ class BST {
         this.updatePositions(this.root, document.getElementById("treeCanvas").getBoundingClientRect().width / 2, 40, this.currentHorizontalSpacing);
         this.renderTree();
     }
-    
+
     _deleteNode(root, value) {
         if (root === null) {
             this.log(`Value ${value} not found`);
@@ -95,7 +95,6 @@ class BST {
                 this.log(`Value ${value} deleted`);
                 return root.left;
             }
-
             root.value = this._minValue(root.right);
             root.right = this._deleteNode(root.right, root.value);
             this.log(`Value ${value} deleted`);
@@ -136,10 +135,10 @@ class BST {
         console.log('Rendering tree...');
         const svg = d3.select("#treeCanvas");
         svg.selectAll("*").remove(); // Clear existing content
-    
+
         // Render nodes and curved lines
         this.renderNode(svg, this.root);
-    
+
         // Adjust SVG dimensions
         this.adjustSVGSize(svg);
     }
@@ -158,8 +157,8 @@ class BST {
         const height = Math.max(maxY - minY + this.nodeRadius * 2, window.innerHeight / 2);
 
         svg.attr("width", width)
-           .attr("height", height)
-           .attr("viewBox", `${minX - margin} ${minY - margin} ${width + margin * 2} ${height + margin * 2}`);
+            .attr("height", height)
+            .attr("viewBox", `${minX - margin} ${minY - margin} ${width + margin * 2} ${height + margin * 2}`);
     }
 
     getNodes() {
@@ -218,11 +217,12 @@ class BST {
         svg.append("path")
             .attr("d", pathData)
             .attr("stroke", "#ccc")
-            .attr("stroke-width", 2)
-            .attr("fill", "none");
+            .attr("fill", "transparent")
+            .attr("stroke-width", 2);
     }
 
     log(message) {
+        console.log(`Logging message: ${message}`); // Debug log
         const consoleDiv = document.getElementById('console');
         if (consoleDiv) {
             const messageDiv = document.createElement('div');
@@ -238,7 +238,8 @@ class BST {
 const bst = new BST();
 
 document.getElementById('submitBtn').addEventListener('click', function () {
-    console.log('Submit button clicked'); // Debugging statement
+    console.log('Submit button clicked');
+
     const action = document.getElementById('action').value;
     const value = parseInt(document.getElementById('nodeValue').value);
 
@@ -247,11 +248,16 @@ document.getElementById('submitBtn').addEventListener('click', function () {
         return;
     }
 
-    if (action === 'insert') {
-        bst.insert(value);
-    } else if (action === 'delete') {
-        bst.delete(value);
-    } else if (action === 'search') {
-        bst.search(value);
+    switch (action) {
+        case 'insert':
+            bst.insert(value);
+            break;
+        case 'delete':
+            bst.delete(value);
+            break;
+        case 'search':
+            bst.search(value);
+            break;
     }
+    document.getElementById('nodeValue').value = ''; // Clear input after action
 });
